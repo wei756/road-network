@@ -136,6 +136,17 @@ deadzone = 10;
         else 
             stageRoad++;
         break;
+        case 2: // 컷
+        mx[stageRoad] = mouse_x;
+        my[stageRoad] = mouse_y;
+        mid[stageRoad] = findNearestEdge(edge, mx[stageRoad], my[stageRoad]);
+        show_debug_message(mid[stageRoad]);
+        var mpi = findNearestPointInCurve(mid[stageRoad].curve, mx[stageRoad], my[stageRoad]);
+        if (getDistancePointInCurve(mid[stageRoad].curve, mpi, mx[stageRoad], my[stageRoad]) &lt; deadzone) {
+            cutRoad(mid[stageRoad], mpi);
+        }
+        
+        break;
     }
 }
 </string>
@@ -325,7 +336,7 @@ if (modeRoad == 1) {
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>modeRoadShape = !modeRoadShape;
+            <string>modeRoadShape = (modeRoadShape + 1) % 3;
 </string>
           </argument>
         </arguments>
