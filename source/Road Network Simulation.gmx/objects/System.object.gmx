@@ -25,14 +25,7 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>bx = 100;
-by = 100;
-ex = 400;
-ey = 400;
-px = 300;
-py = 100;
-
-curve = makeBezierCurve(bx, by, ex, ey, px, py, 1);
+            <string>
 
 /* 도로 모양
  * 
@@ -50,10 +43,15 @@ stageRoad = 0;
 
 /* 도로 긋기 좌표 */
 for(var i = 0; i &lt; 3; i++) {
-    mx[i] = 0;
-    my[i] = 0;
-    mid[i] = -1;
+    roadToolPoint[i] = ds_list_create();
 }
+
+pocusPoint = ds_list_create();
+
+pocus_x = mouse_x;
+pocus_y = mouse_y;
+pocus_id = -1;
+pocus_ind = 0;
 
 /* 노드, 엣지 색인 */
 node = ds_list_create();
@@ -61,6 +59,48 @@ edge = ds_list_create();
 
 /* 도로 긋기 데드존 */
 deadzone = 10;
+
+draw_set_font(fntSystem);
+global.debug_margin = 14;
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="3" enumb="0">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>pocus_x = mouse_x;
+pocus_y = mouse_y;
+pocus_id = -1;
+pocus_ind = 0;
+if (modeRoad == 1) {
+    ds_list_destroy(pocusPoint);
+    pocusPoint = getNearestPointable(mouse_x, mouse_y, deadzone);
+    pocus_x = pocusPoint[| 0];
+    pocus_y = pocusPoint[| 1];
+    pocus_id = -1;
+    pocus_ind = 0;
+    if (ds_list_size(pocusPoint) &gt; 2) {
+        pocus_id = pocusPoint[| 2];
+        if (ds_list_size(pocusPoint) &gt; 3)
+            pocus_ind = pocusPoint[| 3];
+    }
+}
 </string>
           </argument>
         </arguments>
@@ -86,25 +126,24 @@ deadzone = 10;
             <string>if (modeRoad == 1) {
     switch(modeRoadShape) {
         case 0: // 직선
-        mx[stageRoad] = mouse_x;
-        my[stageRoad] = mouse_y;
-        mid[stageRoad] = findNearest(mx[stageRoad], my[stageRoad], node);
+        ds_list_copy(roadToolPoint[stageRoad], pocusPoint);
         if(stageRoad = 1) {
-            for(var i = 0; i &lt; 2; i++)
-            if (mid[i] == -1 || point_distance(mid[i].x, mid[i].y, mx[i], my[i]) &gt; deadzone) { // 근접 노드가 없으면
-                // 노드 생성
-                mid[i] = addList(node, mx[i], my[i], CrossRoad);
+            for(var i = 0; i &lt; 2; i++) {
+                var point = roadToolPoint[i];
+                if(ds_list_size(point) == 2) { // 새 노드
+                    // 노드 생성
+                    ds_list_add(point, addList(node, point[| 0], point[| 1], CrossRoad));
+                } else if(ds_list_size(point) == 4) { // 기존 도로에 결합
+                    point[| 2] = cutRoad(point[| 2], point[| 3]).bid;
+                    ds_list_delete(point, 3);
+                }
             }
             var roadPreset = -1;
             //도로 생성
-            //var newRoad = addRoad(mid[0], mid[1], (mx[0] + mx[1]) / 2, (my[0] + my[1]) / 2, roadPreset);
-            var newRoad = addList(edge, mid[0].x, mid[0].y, Road);
-            with(newRoad) {
-                bid = other.mid[0];
-                eid = other.mid[1];
-                px = (other.mx[0] + other.mx[1]) / 2;
-                py = (other.my[0] + other.my[1]) / 2;
-            }
+            var newRoad = addRoad(ds_list_find_value(roadToolPoint[0], 2),
+                                    ds_list_find_value(roadToolPoint[1], 2), 
+                                    (ds_list_find_value(roadToolPoint[0], 0) + ds_list_find_value(roadToolPoint[1], 0)) / 2, 
+                                    (ds_list_find_value(roadToolPoint[0], 1) + ds_list_find_value(roadToolPoint[1], 1)) / 2, roadPreset);
             stageRoad = 0;
         }
         else 
@@ -112,69 +151,31 @@ deadzone = 10;
         break;
         
         case 1: // 곡선
-        mx[stageRoad] = mouse_x;
-        my[stageRoad] = mouse_y;
-        mid[stageRoad] = findNearest(mx[stageRoad], my[stageRoad], node);
+        ds_list_copy(roadToolPoint[stageRoad], pocusPoint);
         if(stageRoad = 2) {
-            for(var i = 0; i &lt; 3; i += 2)
-            if (mid[i] == -1 || point_distance(mid[i].x, mid[i].y, mx[i], my[i]) &gt; deadzone) { // 근접 노드가 없으면
-                // 노드 생성
-                mid[i] = addList(node, mx[i], my[i], CrossRoad);
+            for(var i = 0; i &lt; 3; i += 2) {
+                var point = roadToolPoint[i];
+                if(ds_list_size(point) == 2) { // 새 노드
+                    // 노드 생성
+                    ds_list_add(point, addList(node, point[| 0], point[| 1], CrossRoad));
+                } else if(ds_list_size(point) == 4) { // 기존 도로에 결합
+                    point[| 2] = cutRoad(point[| 2], point[| 3]).bid;
+                    ds_list_delete(point, 3);
+                }
             }
             var roadPreset = -1;
             //도로 생성
-            //var newRoad = addRoad(mid[0], mid[1], (mx[0] + mx[1]) / 2, (my[0] + my[1]) / 2, roadPreset);
-            var newRoad = addList(edge, mid[0].x, mid[0].y, Road);
-            with(newRoad) {
-                bid = other.mid[0];
-                eid = other.mid[2];
-                px = other.mx[1];
-                py = other.my[1];
-            }
+            var newRoad = addRoad(ds_list_find_value(roadToolPoint[0], 2),
+                                    ds_list_find_value(roadToolPoint[2], 2), 
+                                    ds_list_find_value(roadToolPoint[1], 0), 
+                                    ds_list_find_value(roadToolPoint[1], 1), roadPreset);
             stageRoad = 0;
         }
         else 
             stageRoad++;
         break;
-        case 2: // 컷
-        mx[stageRoad] = mouse_x;
-        my[stageRoad] = mouse_y;
-        mid[stageRoad] = findNearestEdge(edge, mx[stageRoad], my[stageRoad]);
-        show_debug_message(mid[stageRoad]);
-        var mpi = findNearestPointInCurve(mid[stageRoad].curve, mx[stageRoad], my[stageRoad]);
-        if (getDistancePointInCurve(mid[stageRoad].curve, mpi, mx[stageRoad], my[stageRoad]) &lt; deadzone) {
-            cutRoad(mid[stageRoad], mpi);
-        }
-        
-        break;
     }
 }
-</string>
-          </argument>
-        </arguments>
-      </action>
-    </event>
-    <event eventtype="6" enumb="50">
-      <action>
-        <libid>1</libid>
-        <id>603</id>
-        <kind>7</kind>
-        <userelative>0</userelative>
-        <isquestion>0</isquestion>
-        <useapplyto>-1</useapplyto>
-        <exetype>2</exetype>
-        <functionname></functionname>
-        <codestring></codestring>
-        <whoName>self</whoName>
-        <relative>0</relative>
-        <isnot>0</isnot>
-        <arguments>
-          <argument>
-            <kind>1</kind>
-            <string>px = mouse_x;
-py = mouse_y;
-ds_list_destroy(curve);
-curve = makeBezierCurve(bx, by, ex, ey, px, py, 1);
 </string>
           </argument>
         </arguments>
@@ -197,120 +198,47 @@ curve = makeBezierCurve(bx, by, ex, ey, px, py, 1);
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>/*
- * bezier curve test
-draw_set_colour(c_red);
-draw_circle(bx, by, 10, 1);
-draw_text(bx, by, "x: " + string(bx));
-draw_text(bx, by + 20, "y: " + string(by));
-
-draw_set_colour(c_red);
-draw_circle(ex, ey, 10, 1);
-draw_text(ex, ey, "x: " + string(ex));
-draw_text(ex, ey + 20, "y: " + string(ey));
-
-draw_set_colour(c_purple);
-draw_circle(px, py, 10, 1);
-draw_text(px, py, "x: " + string(px));
-draw_text(px, py + 20, "y: " + string(py));
-
-draw_set_colour(c_green);
-draw_curve(curve);
-*/
-
-draw_set_colour(c_black);
+            <string>draw_set_colour(c_black);
 draw_text(0, 10, "modeRoadShape: " + string(modeRoadShape));
-draw_text(0, 10 + 20, "modeRoad: " + string(modeRoad));
-draw_text(0, 10 + 40, "stageRoad: " + string(stageRoad));
+draw_text(0, 10 + global.debug_margin, "modeRoad: " + string(modeRoad));
+draw_text(0, 10 + global.debug_margin*2, "stageRoad: " + string(stageRoad));
+for(var i = 0; i &lt; ds_list_size(pocusPoint); i++)
+    draw_text(0, 20 + global.debug_margin*3 + global.debug_margin*i, "pocusPoint[" + string(i) + "]: " + string(pocusPoint[| i]));
 
+/* cursor */
+if (ds_list_size(pocusPoint) &gt; 1) {
+    draw_set_color(c_fuchsia);
+    draw_circle(pocusPoint[| 0], pocusPoint[| 1], deadzone, 1);
+}
+
+/* for debug
 for(var i = 0; i &lt; 3; i++) {
     draw_text(0, 70 + 60*i, "mx[" + string(i) + "]: " + string(mx[i]));
     draw_text(0, 90 + 60*i, "my[" + string(i) + "]: " + string(my[i]));
     draw_text(0, 110 + 60*i, "mid[" + string(i) + "]: " + string(mid[i]));
 }
+*/
 
 //road tool
+
 if (modeRoad == 1) {
     draw_set_color(c_fuchsia);
-    var near = findNearest(mouse_x, mouse_y, node);
+    for(var i = 0; i &lt; stageRoad; i++) {
+        var point = roadToolPoint[i];
+        //preview circle
+        draw_circle(point[| 0], point[| 1], 10, 1);
+    }
     switch(modeRoadShape) {
         case 0: // 직선
+        case 1: // 곡선
+        var point0 = roadToolPoint[0], point1 = roadToolPoint[1];
         if (stageRoad == 1) {
-            if (point_distance(mid[0].x, mid[0].y, mx[0], my[0]) &gt; deadzone) {
-                //preview circle
-                draw_circle(mx[0], my[0], 10, 1);
-                //preview line
-                if (near == -1 || point_distance(near.x, near.y, mouse_x, mouse_y) &gt; deadzone)
-                    draw_line(mx[0], my[0], mouse_x, mouse_y);
-                else
-                    draw_line(mx[0], my[0], near.x, near.y);
-                
-            } else {
-                //preview circle
-                draw_circle(mid[0].x, mid[0].y, 10, 1);
-                //preview line
-                if (near == -1 || point_distance(near.x, near.y, mouse_x, mouse_y) &gt; deadzone)
-                    draw_line(mid[0].x, mid[0].x, mouse_x, mouse_y);
-                else
-                    draw_line(mid[0].x, mid[0].y, near.x, near.y);
-            }
+            draw_line(point0[| 0], point0[| 1], pocusPoint[| 0], pocusPoint[| 1]);
+        } else if (stageRoad == 2) {
+            var cur = makeBezierCurve(point0[| 0], point0[| 1], pocusPoint[| 0], pocusPoint[| 1], point1[| 0], point1[| 1], 1);
+            draw_curve(cur);
+            ds_list_destroy(cur);
         }
-        //current
-        if (near == -1 || point_distance(near.x, near.y, mouse_x, mouse_y) &gt; deadzone)
-            draw_circle(mouse_x, mouse_y, 10, 1);
-        else
-            draw_circle(near.x, near.y, 10, 1);
-        break;
-        
-        case 1:
-        for(var i = 0; i &lt; stageRoad; i++) {
-            if (i == 1 || point_distance(mid[i].x, mid[i].y, mx[i], my[i]) &gt; deadzone) {
-                //preview circle
-                draw_circle(mx[i], my[i], 10, 1);
-                //preview line
-                if(stageRoad == 2 &amp;&amp; i == 0) {
-                    if (near == -1 || point_distance(near.x, near.y, mouse_x, mouse_y) &gt; deadzone) {
-                        var cur = makeBezierCurve(mx[i], my[i], mouse_x, mouse_y, mx[1], my[1], 1);
-                        draw_curve(cur);
-                        ds_list_destroy(cur);
-                    } else {
-                        var cur = makeBezierCurve(mx[i], my[i], near.x, near.y, mx[1], my[1], 1);
-                        draw_curve(cur);
-                        ds_list_destroy(cur);
-                    }
-                } else if (stageRoad == 1) {
-                    if (near == -1 || point_distance(near.x, near.y, mouse_x, mouse_y) &gt; deadzone)
-                        draw_line(mx[i], my[i], mouse_x, mouse_y);
-                    else
-                        draw_line(mx[i], my[i], near.x, near.y);
-                }
-            } else {
-                //preview circle
-                draw_circle(mid[i].x, mid[i].y, 10, 1);
-                //preview line
-                if(stageRoad == 2 &amp;&amp; i == 0) {
-                    if (near == -1 || point_distance(near.x, near.y, mouse_x, mouse_y) &gt; deadzone) {
-                        var cur = makeBezierCurve(mid[i].x, mid[i].y, mouse_x, mouse_y, mx[1], my[1], 1);
-                        draw_curve(cur);
-                        ds_list_destroy(cur);
-                    } else {
-                        var cur = makeBezierCurve(mid[i].x, mid[i].y, near.x, near.y, mx[1], my[1], 1);
-                        draw_curve(cur);
-                        ds_list_destroy(cur);
-                    }
-                } else if (stageRoad == 1) {
-                    if (near == -1 || point_distance(near.x, near.y, mouse_x, mouse_y) &gt; deadzone)
-                        draw_line(mid[i].x, mid[i].y, mouse_x, mouse_y);
-                    else
-                        draw_line(mid[i].x, mid[i].y, near.x, near.y);
-                }
-            }
-        }
-        //current
-        if (near == -1 || i == 1 || point_distance(near.x, near.y, mouse_x, mouse_y) &gt; deadzone) 
-            draw_circle(mouse_x, mouse_y, 10, 1);
-        else
-            draw_circle(near.x, near.y, 10, 1);
         break;
     }
 }

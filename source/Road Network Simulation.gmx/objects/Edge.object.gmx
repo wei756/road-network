@@ -63,7 +63,7 @@ length = getCurveLength(curve);
 draw_set_colour(c_lime);
 draw_curve(curve);
 draw_text((bid.x + eid.x) / 2, (bid.y + eid.y) / 2, "id: " + string(id));
-draw_text((bid.x + eid.x) / 2, (bid.y + eid.y) / 2 + 20, "length: " + string(length));
+draw_text((bid.x + eid.x) / 2, (bid.y + eid.y) / 2 + global.debug_margin, "length: " + string(length));
 
 draw_set_colour(c_blue);
 draw_circle(px, py, 7, 1);
