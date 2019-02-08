@@ -5,7 +5,7 @@
   <visible>-1</visible>
   <depth>0</depth>
   <persistent>0</persistent>
-  <parentName>Edge</parentName>
+  <parentName>&lt;undefined&gt;</parentName>
   <maskName>&lt;undefined&gt;</maskName>
   <events>
     <event eventtype="0" enumb="0">
@@ -25,10 +25,7 @@
         <arguments>
           <argument>
             <kind>1</kind>
-            <string>event_inherited();
-initRoad(self);
-//properties|type, updown, width, join type, tree, car:human, car:personal, car:fire/police, car:trash, car:truck, car:bicycle, maxspeed, view line
-
+            <string>preset[0] = ds_list_create();
 </string>
           </argument>
         </arguments>

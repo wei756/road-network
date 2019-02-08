@@ -5,6 +5,7 @@ _road.bid = _snid;
 _road.eid = _enid;
 _road.px = _px;
 _road.py = _py;
+initRoad(_road);
 
 //preset
 return _road;

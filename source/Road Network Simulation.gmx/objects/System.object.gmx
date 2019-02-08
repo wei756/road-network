@@ -62,6 +62,7 @@ deadzone = 10;
 
 draw_set_font(fntSystem);
 global.debug_margin = 14;
+instance_create(0, 0, roadPreset);
 </string>
           </argument>
         </arguments>
@@ -138,12 +139,11 @@ if (modeRoad == 1) {
                     ds_list_delete(point, 3);
                 }
             }
-            var roadPreset = -1;
             //도로 생성
             var newRoad = addRoad(ds_list_find_value(roadToolPoint[0], 2),
                                     ds_list_find_value(roadToolPoint[1], 2), 
                                     (ds_list_find_value(roadToolPoint[0], 0) + ds_list_find_value(roadToolPoint[1], 0)) / 2, 
-                                    (ds_list_find_value(roadToolPoint[0], 1) + ds_list_find_value(roadToolPoint[1], 1)) / 2, roadPreset);
+                                    (ds_list_find_value(roadToolPoint[0], 1) + ds_list_find_value(roadToolPoint[1], 1)) / 2, roadPreset.preset[0]);
             stageRoad = 0;
         }
         else 
@@ -163,12 +163,11 @@ if (modeRoad == 1) {
                     ds_list_delete(point, 3);
                 }
             }
-            var roadPreset = -1;
             //도로 생성
             var newRoad = addRoad(ds_list_find_value(roadToolPoint[0], 2),
                                     ds_list_find_value(roadToolPoint[2], 2), 
                                     ds_list_find_value(roadToolPoint[1], 0), 
-                                    ds_list_find_value(roadToolPoint[1], 1), roadPreset);
+                                    ds_list_find_value(roadToolPoint[1], 1), roadPreset.preset[0]);
             stageRoad = 0;
         }
         else 
@@ -199,11 +198,12 @@ if (modeRoad == 1) {
           <argument>
             <kind>1</kind>
             <string>draw_set_colour(c_black);
-draw_text(0, 10, "modeRoadShape: " + string(modeRoadShape));
-draw_text(0, 10 + global.debug_margin, "modeRoad: " + string(modeRoad));
-draw_text(0, 10 + global.debug_margin*2, "stageRoad: " + string(stageRoad));
+draw_text(0, 0, "fps_real: " + string(fps_real));
+draw_text(0, 15, "modeRoadShape: " + string(modeRoadShape));
+draw_text(0, 15 + global.debug_margin, "modeRoad: " + string(modeRoad));
+draw_text(0, 15 + global.debug_margin*2, "stageRoad: " + string(stageRoad));
 for(var i = 0; i &lt; ds_list_size(pocusPoint); i++)
-    draw_text(0, 20 + global.debug_margin*3 + global.debug_margin*i, "pocusPoint[" + string(i) + "]: " + string(pocusPoint[| i]));
+    draw_text(0, 25 + global.debug_margin*3 + global.debug_margin*i, "pocusPoint[" + string(i) + "]: " + string(pocusPoint[| i]));
 
 /* cursor */
 if (ds_list_size(pocusPoint) &gt; 1) {

@@ -31,7 +31,6 @@
     <script>scripts\makeBezierCurve.gml</script>
     <script>scripts\getCurveLength.gml</script>
     <script>scripts\draw_curve.gml</script>
-    <script>scripts\addRoad.gml</script>
     <script>scripts\addList.gml</script>
     <script>scripts\getDistancePointInCurve.gml</script>
     <script>scripts\findNearestInstance.gml</script>
@@ -40,6 +39,13 @@
     <script>scripts\cutRoad.gml</script>
     <script>scripts\getNearestPointable.gml</script>
     <script>scripts\getPointDistance.gml</script>
+    <scripts name="road">
+      <script>scripts\addRoad.gml</script>
+      <script>scripts\initRoad.gml</script>
+      <script>scripts\addLane.gml</script>
+      <script>scripts\copyRoadProperties.gml</script>
+      <script>scripts\generateRoadName.gml</script>
+    </scripts>
   </scripts>
   <fonts name="fonts">
     <font>fonts\fntSystem</font>
@@ -52,10 +58,17 @@
     <object>objects\System</object>
     <object>objects\Road</object>
     <object>objects\CrossRoad</object>
+    <object>objects\roadPreset</object>
   </objects>
   <rooms name="rooms">
     <room>rooms\main</room>
   </rooms>
+  <constants number="4">
+    <constant name="IN">0</constant>
+    <constant name="OUT">1</constant>
+    <constant name="LANE_PROPERTIES">13</constant>
+    <constant name="INSTANCE_NOT_EXIST">-1</constant>
+  </constants>
   <help>
     <rtf>help.rtf</rtf>
   </help>

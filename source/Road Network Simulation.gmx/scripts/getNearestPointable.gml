@@ -4,7 +4,8 @@ var _rx = _x, _ry = _y, _rid = -1, _rind = -1;
 var _point = ds_list_create();
 
 var _nearNode = findNearestInstance(_x, _y, System.node);
-if (point_distance(_nearNode.x, _nearNode.y, _x, _y) < _deadzone) { // node
+
+if (_nearNode != -1 && point_distance(_nearNode.x, _nearNode.y, _x, _y) < _deadzone) { // node
     _rx = _nearNode.x;
     _ry = _nearNode.y;
     _rid = _nearNode;
