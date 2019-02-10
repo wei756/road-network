@@ -51,8 +51,8 @@
             <string>draw_set_colour(c_red);
 draw_circle(x, y, 10, 1);
 draw_text(x, y, "id: " + string(id));
-draw_text(x, y + global.debug_margin, "x: " + string(x));
-draw_text(x, y + global.debug_margin*2, "y: " + string(y));
+draw_text(x, y + DEBUG_MARGIN, "x: " + string(x));
+draw_text(x, y + DEBUG_MARGIN*2, "y: " + string(y));
 </string>
           </argument>
         </arguments>

@@ -36,15 +36,20 @@
     <script>scripts\findNearestInstance.gml</script>
     <script>scripts\findNearestPointInCurve.gml</script>
     <script>scripts\findNearestEdge.gml</script>
-    <script>scripts\cutRoad.gml</script>
     <script>scripts\getNearestPointable.gml</script>
     <script>scripts\getPointDistance.gml</script>
     <scripts name="road">
-      <script>scripts\addRoad.gml</script>
       <script>scripts\initRoad.gml</script>
+      <script>scripts\addRoad.gml</script>
+      <script>scripts\cutRoad.gml</script>
       <script>scripts\addLane.gml</script>
       <script>scripts\copyRoadProperties.gml</script>
       <script>scripts\generateRoadName.gml</script>
+      <script>scripts\updateCrossRoad.gml</script>
+      <script>scripts\updateCrossRoadAll.gml</script>
+    </scripts>
+    <scripts name="path">
+      <script>scripts\navigate.gml</script>
     </scripts>
   </scripts>
   <fonts name="fonts">
@@ -63,11 +68,12 @@
   <rooms name="rooms">
     <room>rooms\main</room>
   </rooms>
-  <constants number="4">
+  <constants number="5">
     <constant name="IN">0</constant>
     <constant name="OUT">1</constant>
     <constant name="LANE_PROPERTIES">13</constant>
     <constant name="INSTANCE_NOT_EXIST">-1</constant>
+    <constant name="DEBUG_MARGIN">14</constant>
   </constants>
   <help>
     <rtf>help.rtf</rtf>

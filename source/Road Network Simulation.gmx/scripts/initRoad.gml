@@ -15,11 +15,7 @@ _inst.name = generateRoadName();
 _inst.type = 0;
 
 /* road's lanes */
-_inst.lane = array_create(LANE_PROPERTIES);
-
-for(var _i = 0; _i < LANE_PROPERTIES; _i++) {
-    _inst.lane[_i] = ds_list_create();
-}
+_inst.lane = ds_list_create();
 
 /*
  * soundproof wall
@@ -38,3 +34,6 @@ _inst.wall = 0;
  * 2 봉형
  */
 _inst.guardrail = 0;
+
+/* 평균 주행속도 */
+_inst.avgSpeed = 50;

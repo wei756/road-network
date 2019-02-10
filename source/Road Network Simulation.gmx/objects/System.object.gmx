@@ -35,6 +35,24 @@
  */
 modeRoadShape = 0;
 
+//////////////
+
+/* 길찾기 툴 */
+modeFind = 0;
+
+/* 길찾기 단계 */
+stageFind = 0;
+
+/* 길찾기 좌표 */
+for(var i = 0; i &lt; 3; i++) {
+    findToolPoint[i] = ds_list_create();
+}
+
+/* 길찾기 경로 */
+path = ds_list_create();
+
+//////////////
+
 /* 도로 툴 */
 modeRoad = 0;
 
@@ -61,7 +79,6 @@ edge = ds_list_create();
 deadzone = 10;
 
 draw_set_font(fntSystem);
-global.debug_margin = 14;
 instance_create(0, 0, roadPreset);
 </string>
           </argument>
@@ -89,7 +106,7 @@ instance_create(0, 0, roadPreset);
 pocus_y = mouse_y;
 pocus_id = -1;
 pocus_ind = 0;
-if (modeRoad == 1) {
+if (modeRoad == 1 || modeFind == 1) {
     ds_list_destroy(pocusPoint);
     pocusPoint = getNearestPointable(mouse_x, mouse_y, deadzone);
     pocus_x = pocusPoint[| 0];
@@ -128,7 +145,7 @@ if (modeRoad == 1) {
     switch(modeRoadShape) {
         case 0: // 직선
         ds_list_copy(roadToolPoint[stageRoad], pocusPoint);
-        if(stageRoad = 1) {
+        if(stageRoad == 1) {
             for(var i = 0; i &lt; 2; i++) {
                 var point = roadToolPoint[i];
                 if(ds_list_size(point) == 2) { // 새 노드
@@ -144,6 +161,7 @@ if (modeRoad == 1) {
                                     ds_list_find_value(roadToolPoint[1], 2), 
                                     (ds_list_find_value(roadToolPoint[0], 0) + ds_list_find_value(roadToolPoint[1], 0)) / 2, 
                                     (ds_list_find_value(roadToolPoint[0], 1) + ds_list_find_value(roadToolPoint[1], 1)) / 2, roadPreset.preset[0]);
+            updateCrossRoadAll(node);
             stageRoad = 0;
         }
         else 
@@ -152,7 +170,7 @@ if (modeRoad == 1) {
         
         case 1: // 곡선
         ds_list_copy(roadToolPoint[stageRoad], pocusPoint);
-        if(stageRoad = 2) {
+        if(stageRoad == 2) {
             for(var i = 0; i &lt; 3; i += 2) {
                 var point = roadToolPoint[i];
                 if(ds_list_size(point) == 2) { // 새 노드
@@ -168,12 +186,22 @@ if (modeRoad == 1) {
                                     ds_list_find_value(roadToolPoint[2], 2), 
                                     ds_list_find_value(roadToolPoint[1], 0), 
                                     ds_list_find_value(roadToolPoint[1], 1), roadPreset.preset[0]);
+            updateCrossRoadAll(node);
             stageRoad = 0;
         }
         else 
             stageRoad++;
         break;
     }
+} else if (modeFind == 1) {
+    ds_list_copy(findToolPoint[stageFind], pocusPoint);
+    if(stageFind == 1 &amp;&amp; ds_list_size(findToolPoint[stageFind]) == 3) { // 클릭한 게 노드일 때만
+        path = navigate(node, ds_list_find_value(findToolPoint[0], 2), ds_list_find_value(findToolPoint[1], 2));
+        if !(ds_exists(path, ds_type_list)) show_debug_message("failed to find path");
+        stageFind = 0;
+    }
+    else if(ds_list_size(findToolPoint[stageFind]) == 3) 
+        stageFind++;
 }
 </string>
           </argument>
@@ -200,15 +228,25 @@ if (modeRoad == 1) {
             <string>draw_set_colour(c_black);
 draw_text(0, 0, "fps_real: " + string(fps_real));
 draw_text(0, 15, "modeRoadShape: " + string(modeRoadShape));
-draw_text(0, 15 + global.debug_margin, "modeRoad: " + string(modeRoad));
-draw_text(0, 15 + global.debug_margin*2, "stageRoad: " + string(stageRoad));
-for(var i = 0; i &lt; ds_list_size(pocusPoint); i++)
-    draw_text(0, 25 + global.debug_margin*3 + global.debug_margin*i, "pocusPoint[" + string(i) + "]: " + string(pocusPoint[| i]));
+draw_text(0, 15 + DEBUG_MARGIN, "modeRoad: " + string(modeRoad));
+draw_text(0, 15 + DEBUG_MARGIN*2, "stageRoad: " + string(stageRoad));
+draw_text(0, 15 + DEBUG_MARGIN*3, "modeFind: " + string(modeFind));
+var j = 0;
+for(var j = 0; j &lt; ds_list_size(path); j++)
+    draw_text(0, 25 + DEBUG_MARGIN*3 + DEBUG_MARGIN*j, "path[" + string(j) + "]: " + string(path[| j]));
+for(var i = j; i &lt; ds_list_size(pocusPoint); i++)
+    draw_text(0, 25 + DEBUG_MARGIN*3 + DEBUG_MARGIN*i, "pocusPoint[" + string(i) + "]: " + string(pocusPoint[| i]));
 
 /* cursor */
 if (ds_list_size(pocusPoint) &gt; 1) {
     draw_set_color(c_fuchsia);
     draw_circle(pocusPoint[| 0], pocusPoint[| 1], deadzone, 1);
+}
+
+//find tool
+for(var i = 0; i &lt; ds_list_size(path); i++) {
+    draw_set_color(c_gray);
+    draw_circle(path[| i].x, path[| i].y, deadzone / 2, 0);
 }
 
 /* for debug
@@ -288,6 +326,29 @@ if (modeRoad == 1) {
           <argument>
             <kind>1</kind>
             <string>modeRoad = !modeRoad;
+</string>
+          </argument>
+        </arguments>
+      </action>
+    </event>
+    <event eventtype="9" enumb="70">
+      <action>
+        <libid>1</libid>
+        <id>603</id>
+        <kind>7</kind>
+        <userelative>0</userelative>
+        <isquestion>0</isquestion>
+        <useapplyto>-1</useapplyto>
+        <exetype>2</exetype>
+        <functionname></functionname>
+        <codestring></codestring>
+        <whoName>self</whoName>
+        <relative>0</relative>
+        <isnot>0</isnot>
+        <arguments>
+          <argument>
+            <kind>1</kind>
+            <string>modeFind = !modeFind;
 </string>
           </argument>
         </arguments>

@@ -5,7 +5,6 @@ var _road = argument0, _lane = argument1;
 if (!instance_exists(_road)) { return INSTANCE_NOT_EXIST; }
 if (ds_list_size(_lane) != LANE_PROPERTIES) { return -2; }
 
-for(var _i = 0; _i < LANE_PROPERTIES; _i++)
-    ds_list_add(_road.lane[_i], _lane[| _i]);
+ds_list_add(_road.lane, _lane);
 
 return 0;
