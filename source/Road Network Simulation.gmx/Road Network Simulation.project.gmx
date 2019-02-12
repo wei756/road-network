@@ -47,6 +47,7 @@
       <script>scripts\generateRoadName.gml</script>
       <script>scripts\updateCrossRoad.gml</script>
       <script>scripts\updateCrossRoadAll.gml</script>
+      <script>scripts\updateRoadWidth.gml</script>
     </scripts>
     <scripts name="path">
       <script>scripts\navigate.gml</script>
@@ -68,12 +69,16 @@
   <rooms name="rooms">
     <room>rooms\main</room>
   </rooms>
-  <constants number="5">
+  <constants number="9">
     <constant name="IN">0</constant>
     <constant name="OUT">1</constant>
-    <constant name="LANE_PROPERTIES">13</constant>
+    <constant name="LANE_PROPERTIES">12</constant>
     <constant name="INSTANCE_NOT_EXIST">-1</constant>
     <constant name="DEBUG_MARGIN">14</constant>
+    <constant name="UP">0</constant>
+    <constant name="DOWN">1</constant>
+    <constant name="INTERLOCK">0</constant>
+    <constant name="INTERSECTION">1</constant>
   </constants>
   <help>
     <rtf>help.rtf</rtf>

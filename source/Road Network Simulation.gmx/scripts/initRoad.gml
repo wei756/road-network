@@ -14,8 +14,20 @@ _inst.name = generateRoadName();
  */
 _inst.type = 0;
 
+/* 도로 전체 폭 */
+_inst.width = 0;
+
 /* road's lanes */
 _inst.lane = ds_list_create();
+var _laneCount = choose(1, 2, 3);
+var _lane = ds_list_create();
+ds_list_add(_lane, 0, DOWN, 7, INTERSECTION, 0, 1, 1, 1, 1, 0, 60, 1);
+for(var i = 0; i < _laneCount; i++)
+    addLane(_inst, _lane);
+_lane[| 1] = UP;
+for(var i = 0; i < _laneCount; i++)
+    addLane(_inst, _lane);
+
 
 /*
  * soundproof wall
