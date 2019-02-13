@@ -280,6 +280,13 @@ if (modeRoad == 1) {
         break;
     }
 }
+/*
+draw_set_colour(c_red);
+draw_primitive_begin(pr_trianglestrip);
+for(var i = 0; i &lt; ds_list_size(node); i++)
+    draw_vertex(node[| i].x, node[| i].y);
+draw_primitive_end();
+*/
 </string>
           </argument>
         </arguments>

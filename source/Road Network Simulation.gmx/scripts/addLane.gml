@@ -8,5 +8,6 @@ if (ds_list_size(_lane) != LANE_PROPERTIES) { return -2; }
 ds_list_copy(__lane, _lane);
 ds_list_add(_road.lane, __lane);
 updateRoadWidth(_road);
+updateRoadRender(_road);
 
 return 0;

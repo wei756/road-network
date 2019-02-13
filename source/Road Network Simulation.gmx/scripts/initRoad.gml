@@ -22,11 +22,15 @@ _inst.lane = ds_list_create();
 var _laneCount = choose(1, 2, 3);
 var _lane = ds_list_create();
 ds_list_add(_lane, 0, DOWN, 7, INTERSECTION, 0, 1, 1, 1, 1, 0, 60, 1);
+addLane(_inst, _lane);
+_lane[| LANE_TEXTURE] = 1;
 for(var i = 0; i < _laneCount; i++)
     addLane(_inst, _lane);
-_lane[| 1] = UP;
+_lane[| LANE_UPDOWN] = UP;
 for(var i = 0; i < _laneCount; i++)
     addLane(_inst, _lane);
+_lane[| LANE_TEXTURE] = 0;
+addLane(_inst, _lane);
 
 
 /*
