@@ -34,10 +34,20 @@ polyLine = ds_list_create();    // polygon, color, alpha, polygon, color, alpha,
 polyDecal = ds_list_create();   // polygon, color, alpha, polygon, color, alpha,...
 
 /* color */
-colorTexture[0] = make_colour_rgb(200, 200, 200); // 인도
-colorTexture[1] = make_colour_rgb(130, 130, 130); // 일반도로
-colorTexture[2] = make_colour_rgb(200, 50, 50); // 버스전용차로
-colorTexture[3] = make_colour_rgb(50, 200, 50); // 자전거도로
+colorTexture[0] = make_colour_rgb(200, 200, 200);   // 인도
+colorTexture[1] = make_colour_rgb(54, 57, 64);      // 일반도로
+colorTexture[2] = make_colour_rgb(54, 57, 64);      // 버스전용차로
+colorTexture[3] = make_colour_rgb(151, 83, 112);    // 자전거도로
+
+colorLine[0] = make_colour_rgb(244, 209, 6);        // 중앙선
+colorLine[1] = make_colour_rgb(224, 228, 231);      // 일반 차선
+colorLine[2] = make_colour_rgb(87, 168, 189);       // 버스전용 차선
+
+/* theme */
+lengthLine[0] = 2;                                  // 차선 변경 불가
+marginLine[0] = 0;
+lengthLine[1] = 5;                                  // 차선 변경 가능
+marginLine[1] = 3;
 
 /* initialize road */
 initRoad(self);
@@ -66,33 +76,41 @@ initRoad(self);
             <kind>1</kind>
             <string>event_inherited();
 
-draw_set_colour(c_maroon);
-draw_text((bid.x + eid.x) / 2, (bid.y + eid.y) / 2 + DEBUG_MARGIN * 2, "[lane]");
-var i;
-for(i = 0; i &lt; ds_list_size(lane); i++) {
-    var _lane = lane[| i], _text = "{";
-    for(var j = 0; j &lt; ds_list_size(_lane); j++)
-        _text += string(_lane[| j]) + ", ";
-    _text += ")";
-    draw_text((bid.x + eid.x) / 2, (bid.y + eid.y) / 2 + DEBUG_MARGIN*(3 + i), "lane[" + string(i) + "]: " + string(_text)); 
+if (debug_mode) {
+    draw_set_colour(c_maroon);
+    draw_text((bid.x + eid.x) / 2, (bid.y + eid.y) / 2 + DEBUG_MARGIN * 2, "[lane]");
+    var i;
+    for(i = 0; i &lt; ds_list_size(lane); i++) {
+        var _lane = lane[| i], _text = "{";
+        for(var j = 0; j &lt; ds_list_size(_lane); j++)
+            _text += string(_lane[| j]) + ", ";
+        _text += ")";
+        draw_text((bid.x + eid.x) / 2, (bid.y + eid.y) / 2 + DEBUG_MARGIN*(3 + i), "lane[" + string(i) + "]: " + string(_text)); 
+    }
+    draw_text((bid.x + eid.x) / 2, (bid.y + eid.y) / 2 + DEBUG_MARGIN*(3 + i), "width: " + string(width));
+    
+    for(var j = 0; j &lt; ds_list_size(polyLane); j += 3)
+    for(var k = 0; k &lt; ds_list_size(polyLane[| j]); k++) {
+        draw_text((bid.x + eid.x) / 2 + 50*(j), 
+                    (bid.y + eid.y) / 2 + DEBUG_MARGIN*(3 + i + k), 
+                    "polyLane[" + string(j) + ", " + string(k) + "]: " + string(ds_list_find_value(polyLane[| j], k))); 
+    }
 }
-draw_text((bid.x + eid.x) / 2, (bid.y + eid.y) / 2 + DEBUG_MARGIN*(3 + i), "width: " + string(width));
-
-for(var j = 0; j &lt; ds_list_size(polyLane); j += 3)
-//var j = 0;
-for(var k = 0; k &lt; ds_list_size(polyLane[| j]); k++) {
-    draw_text((bid.x + eid.x) / 2 + 50*(j), 
-                (bid.y + eid.y) / 2 + DEBUG_MARGIN*(3 + i + k), 
-                "polyLane[" + string(j) + ", " + string(k) + "]: " + string(ds_list_find_value(polyLane[| j], k))); 
-} 
-
 /* draw road */
+
+/* draw lane */
 for(var i = 0; i &lt; ds_list_size(polyLane); i += 3) {
     draw_set_colour(polyLane[| i + 1]);
     draw_set_alpha(polyLane[| i + 2]);
     draw_polygon(polyLane[| i], 0);
 }
-
+/* draw line */
+for(var i = 0; i &lt; ds_list_size(polyLine); i += 3) {
+    draw_set_colour(polyLine[| i + 1]);
+    draw_set_alpha(polyLine[| i + 2]);
+    draw_curveline(polyLine[| i], lengthLine[0], marginLine[0]);
+}
+draw_set_alpha(1);
 </string>
           </argument>
         </arguments>

@@ -5,7 +5,7 @@ _inst.name = _source.name;
 _inst.type = _source.type;
 ds_list_clear(_inst.lane);
 for(var _i = 0; _i < ds_list_size(_source.lane); _i++) {
-    var _lane;
+    var _lane = ds_list_create();
     ds_list_copy(_lane, _source.lane[| _i]);
     ds_list_add(_inst.lane, _lane);
 }

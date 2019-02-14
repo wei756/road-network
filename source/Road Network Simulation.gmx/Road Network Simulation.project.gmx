@@ -39,6 +39,7 @@
     <script>scripts\getNearestPointable.gml</script>
     <script>scripts\getPointDistance.gml</script>
     <script>scripts\draw_polygon.gml</script>
+    <script>scripts\draw_curveline.gml</script>
     <scripts name="road">
       <script>scripts\initRoad.gml</script>
       <script>scripts\addRoad.gml</script>
